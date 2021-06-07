@@ -240,6 +240,7 @@ class Article extends Resource implements BatchInterface
             $price['net'] = $price['price'];
             if ($price['customerGroup'] && $price['customerGroup']['taxInput']) {
                 $price['price'] = $price['price'] * (($taxRate + 100) / 100);
+                $price['pseudoPrice'] = $price['pseudoPrice'] * (($taxRate + 100) / 100);
             }
         }
 
