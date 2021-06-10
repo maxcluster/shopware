@@ -27,6 +27,7 @@ namespace Shopware\Components\HttpCache;
 use Shopware\Bundle\CookieBundle;
 use Shopware\Bundle\CookieBundle\CookieGroupCollection;
 use Shopware\Components\Privacy\CookieRemoveSubscriber;
+use Symfony\Component\HttpFoundation\IpUtils;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\HttpCache\Esi;
@@ -295,16 +296,19 @@ class AppCache extends HttpCache
      */
     protected function isPurgeRequestAllowed(Request $request)
     {
-        if ($request->server->has('SERVER_ADDR')) {
-            if ($request->server->get('SERVER_ADDR') == $request->getClientIp()) {
-                return true;
-            }
+        if ($request->server->has('SERVER_ADDR') && $request->server->get('SERVER_ADDR') === $request->getClientIp()) {
+            return true;
         }
 
-        return $this->isPurgeIPAllowed($request->getClientIp());
+        $clientIp = $request->getClientIp();
+        \assert(\is_string($clientIp));
+
+        return IpUtils::checkIp($clientIp, $this->getPurgeAllowedIPs());
     }
 
     /**
+     * @deprecated - Will be removed with 5.8. Use Symfony\Component\HttpFoundation\IpUtils::checkIp instead
+     *
      * Checks if $ip is allowed for Http PURGE requests
      *
      * @param string $ip
